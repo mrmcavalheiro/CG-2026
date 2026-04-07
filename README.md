@@ -1,12 +1,12 @@
 ﻿# CG-2026
 
-Projeto da disciplina de Computacao Grafica (UNIJUI) com exemplos interativos em Python.
+Projeto da disciplina de Computacao Grafica (UNIJUI) para demonstracao de exemplos de computacao grafica em Python.
 
-## Preview do jogo
+## Preview do programa
 
-![Preview do jogo](assets/gameplay.gif)
+![Preview do programa](assets/preview.gif)
 
-Se preferir imagem estatica, use `assets/gameplay.png` e troque a extensao no link acima.
+Se preferir imagem estatica, use `assets/preview.png` e troque a extensao no link acima.
 
 ## Requisitos
 - Python 3.10+
@@ -46,3 +46,4 @@ git add .
 git commit -m "Atualiza projeto"
 git push
 ```
+
