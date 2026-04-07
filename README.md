@@ -2,6 +2,12 @@
 
 Projeto da disciplina de Computacao Grafica (UNIJUI) com exemplos interativos em Python.
 
+## Preview do jogo
+
+![Preview do jogo](assets/gameplay.gif)
+
+Se preferir imagem estatica, use `assets/gameplay.png` e troque a extensao no link acima.
+
 ## Requisitos
 - Python 3.10+
 - Pygame
@@ -26,6 +32,7 @@ python main.py
 - `input/`: manipulacao de entrada de teclado/mouse.
 - `interface/`: componentes visuais auxiliares.
 - `teoria/`: materiais de apoio teorico.
+- `assets/`: imagens e GIFs usados no README.
 
 ## Observacoes
 - O projeto inicia com tema `UNIJUI` por padrao.
