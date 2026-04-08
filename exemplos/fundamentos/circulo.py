@@ -15,6 +15,7 @@ import pygame
 import math
 import config as cfg
 from exemplos.base    import ExemploBase
+from exemplos.docs_teoria import DOCS_TEORIA
 from interface.tabs   import TabBar, TAB_H
 from interface.doc_view import DocView
 from interface.janela import WindowManager
@@ -37,7 +38,8 @@ class ExCirculo(ExemploBase):
         self.complete  = False
         self.flash     = 0.0
         self._mgr      = None
-        self._teoria   = DocView(cfg.root_path("teoria", "Fundamentos", "circulo.pdf"))
+        self._teoria   = DocView(fallback_blocks=DOCS_TEORIA["circulo"],
+                               download_pdf=cfg.root_path("teoria","Fundamentos","circulo.pdf"))
         self._teoria.set_tab_offset(TAB_H)
         self._tabs     = TabBar(["Demonstração", "Teoria"])
 

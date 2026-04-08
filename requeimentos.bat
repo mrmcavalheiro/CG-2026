@@ -12,13 +12,12 @@ if not defined PY_CMD (
     py -3.10 -c "import sys" >nul 2>nul && set "PY_CMD=py -3.10"
 )
 if not defined PY_CMD (
-    py -3 -c "import sys; raise SystemExit(0 if sys.version_info < (3,14) else 1)" >nul 2>nul && set "PY_CMD=py -3"
+    py -3 -c "import sys" >nul 2>nul && set "PY_CMD=py -3"
 )
 if not defined PY_CMD (
     echo.
-    echo Nao encontrei Python 3.10, 3.11 ou 3.12.
-    echo O pygame pode falhar no Python 3.14.
-    echo Instale Python 3.12 em https://www.python.org/downloads/
+    echo Nao encontrei Python 3 instalado.
+    echo Este projeto usa pygame-ce e e compativel com Python 3.10+ (incluindo 3.14).
     pause
     goto :end
 )

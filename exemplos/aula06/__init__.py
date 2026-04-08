@@ -1,0 +1,1 @@
+﻿from exemplos.aula06.bezier_solucao import ExBezierSolucao

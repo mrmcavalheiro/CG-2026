@@ -1,4 +1,4 @@
-"""
+﻿"""
 ============================================================
  exemplos/cisalhamento.py
 ============================================================
@@ -6,11 +6,12 @@
 import pygame
 import numpy as np
 import config as cfg
-from exemplos.base    import ExemploBase
-from interface.tabs   import TabBar, TAB_H
+from exemplos.base      import ExemploBase
+from exemplos.docs_teoria import DOCS_TEORIA
+from interface.tabs     import TabBar, TAB_H
 from interface.doc_view import DocView
-from interface.janela import WindowManager, draw_rows_in_win
-from interface.ui     import draw_grid, draw_axes, world_to_screen, draw_polygon, draw_line_alpha
+from interface.janela   import WindowManager, draw_rows_in_win
+from interface.ui       import draw_grid, draw_axes, world_to_screen, draw_polygon, draw_line_alpha
 
 
 
@@ -25,7 +26,8 @@ class ExCisalhamento(ExemploBase):
         self.flash = 0.0
         self._mgr  = None
         self._tabs = TabBar(["Demonstração", "Teoria"])
-        self._teoria = DocView(cfg.root_path("teoria", "Aula_04", "cisalhamento.pdf"))
+        self._teoria = DocView(fallback_blocks=DOCS_TEORIA["cisalhamento"],
+                               download_pdf=cfg.root_path("teoria","Aula_04","cisalhamento.pdf"))
         self._teoria.set_tab_offset(TAB_H)
 
     def _init_windows(self):
@@ -33,12 +35,32 @@ class ExCisalhamento(ExemploBase):
         self._mgr = WindowManager(cfg.canvas_rect_tabs)
         cay = cay + TAB_H
         cah = cah - TAB_H
+
+        # Janelas maiores e responsivas para facilitar leitura.
+        left_x = cax + 10
+        top_y = cay + 10
+        gap = 12
+
+        info_w = min(380, max(300, int(caw * 0.34)))
+        info_h = min(260, max(220, int(cah * 0.33)))
+        mat_h = min(210, max(170, int(cah * 0.24)))
+        code_w = min(420, max(320, int(caw * 0.38)))
+        code_h = min(300, max(230, int(cah * 0.33)))
+
+        y_info = top_y
+        y_matriz = y_info + info_h + gap
+        y_code = y_matriz + mat_h + gap
+
+        max_bottom = cay + cah - 10
+        if y_code + code_h > max_bottom:
+            code_h = max(170, max_bottom - y_code)
+
         self._win_info   = self._mgr.create("Cisalhamento (Shearing)",
-            cax+10, cay+10, 270, 215, color=(180,80,20), closable=False)
+            left_x, y_info, info_w, info_h, color=(180,80,20), closable=False)
         self._win_matriz = self._mgr.create("Matriz de Cisalhamento",
-            cax+10, cay+240, 270, 155, color=(20,80,100), closable=False)
+            left_x, y_matriz, info_w, mat_h, color=(20,80,100), closable=False)
         self._win_code   = self._mgr.create("Python — NumPy",
-            cax+10, cay+410, 285, 240, color=(60,40,120), closable=False)
+            left_x, y_code, code_w, code_h, color=(60,40,120), closable=False)
         self._tabs.bind_mgr(self._mgr)
 
     def update(self, dt):
@@ -147,3 +169,4 @@ class ExCisalhamento(ExemploBase):
             elif win is self._win_code:   draw_rows_in_win(surf, win, rows_code)
 
         self._mgr.draw_managed(surface, fonts, _content)
+

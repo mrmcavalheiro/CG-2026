@@ -11,6 +11,7 @@
 ============================================================
 """
 
+import os
 import pygame
 import config as cfg
 
@@ -81,21 +82,30 @@ def _wrap(text, font, max_w):
     return lines or [""]
 
 
+_BTN_H = 28
+_BTN_W = 110
+
 class DocView:
-    def __init__(self, pdf_path=""):
-        self._pdf_path  = pdf_path
-        self._blocks    = []
-        self._loaded    = False
-        self._pdf_pages = []
-        self._mode      = "blocks" if not pdf_path else "pdf"
-        self._scroll    = 0
-        self._max_scroll = 0
-        self._tab_off   = 0
-        self._sb_drag   = False
-        self._sb_drag_y = 0
-        self._key       = ""
+    def __init__(self, pdf_path="", fallback_blocks=None, download_pdf=""):
+        self._pdf_path    = pdf_path
+        self._download    = download_pdf   # caminho para abrir/baixar PDF
+        self._blocks      = []
+        self._fallback    = fallback_blocks or []
+        self._loaded      = False
+        self._pdf_pages   = []
+        self._mode        = "blocks" if not pdf_path else "pdf"
+        self._scroll      = 0
+        self._max_scroll  = 0
+        self._tab_off     = 0
+        self._sb_drag     = False
+        self._sb_drag_y   = 0
+        self._btn_hover   = False
+        self._key         = ""
         if pdf_path:
             self._try_load_pdf()
+        elif self._fallback:
+            self._blocks = self._fallback
+            self._loaded = True
 
     def set_tab_offset(self, h):
         self._tab_off = h
@@ -115,32 +125,64 @@ class DocView:
         except ImportError:
             self._mode   = "blocks"
             self._loaded = True
-            fname = self._pdf_path.replace("\\", "/").split("/")[-1]
-            self._blocks = [
-                _t(f"PDF: {fname}"),
-                _sep(),
-                _b("Para visualizar o PDF instale o pymupdf:"),
-                _c("pip install pymupdf"),
-                _bl(),
-                _b("O conteúdo da teoria está no arquivo PDF na pasta 'teoria/'."),
-            ]
+            if self._fallback:
+                self._blocks = self._fallback
+            else:
+                fname = self._pdf_path.replace("\\", "/").split("/")[-1]
+                self._blocks = [
+                    _t(f"PDF: {fname}"),
+                    _sep(),
+                    _b("Para visualizar o PDF instale o pymupdf:"),
+                    _c("pip install pymupdf"),
+                    _bl(),
+                    _b("O conteúdo da teoria está no arquivo PDF na pasta 'teoria/'."),
+                ]
         except Exception as e:
             self._mode   = "blocks"
             self._loaded = True
-            self._blocks = [
-                _t("Erro ao carregar PDF"),
-                _sep(),
-                _b(str(e)),
-            ]
+            if self._fallback:
+                self._blocks = self._fallback
+            else:
+                self._blocks = [
+                    _t("Erro ao carregar PDF"),
+                    _sep(),
+                    _b(str(e)),
+                ]
 
     def _clamp_scroll(self):
         self._scroll = max(0, min(self._max_scroll, self._scroll))
+
+    def _btn_rect(self):
+        """Retorna Rect do botão 'Abrir PDF', ou None se não houver download_pdf."""
+        if not self._download:
+            return None
+        cx, cy, cw, ch = cfg.canvas_rect()
+        bx = cx + cw - _SB_W - _BTN_W - 8
+        by = cy + self._tab_off + 6
+        return pygame.Rect(bx, by, _BTN_W, _BTN_H)
+
+    def _open_pdf(self):
+        path = self._download
+        if not os.path.isfile(path):
+            return
+        try:
+            if os.name == "nt":
+                os.startfile(path)  # Windows
+            else:
+                import subprocess
+                subprocess.Popen(["xdg-open", path])
+        except Exception:
+            pass
 
     def handle_scroll(self, dy):
         self._scroll -= dy * 40
         self._clamp_scroll()
 
     def handle_mouse_down(self, pos, canvas_rect=None):
+        btn = self._btn_rect()
+        if btn and btn.collidepoint(pos):
+            self._open_pdf()
+            return True
         sb = self._sb_rect()
         if sb and sb.collidepoint(pos):
             self._sb_drag   = True
@@ -149,6 +191,8 @@ class DocView:
         return False
 
     def handle_mouse_move(self, pos):
+        btn = self._btn_rect()
+        self._btn_hover = bool(btn and btn.collidepoint(pos))
         if self._sb_drag:
             dy = pos[1] - self._sb_drag_y
             self._sb_drag_y = pos[1]
@@ -193,6 +237,7 @@ class DocView:
         else:
             self._render_blocks(surface)
         self._draw_scrollbar(surface)
+        self._draw_btn(surface)
 
     def _render_pdf(self, surface):
         if not self._pdf_pages:
@@ -324,6 +369,21 @@ class DocView:
             surface.blit(s, (x, y))
             y += lh
         return y + 6
+
+    def _draw_btn(self, surface):
+        btn = self._btn_rect()
+        if not btn:
+            return
+        exists = os.path.isfile(self._download)
+        bg  = (50, 90, 140) if (self._btn_hover and exists) else (30, 55, 90)
+        fc  = cfg.WHITE if exists else cfg.GRAY2
+        pygame.draw.rect(surface, bg, btn, border_radius=5)
+        pygame.draw.rect(surface, cfg.BLUE, btn, 1, border_radius=5)
+        fn = _font("segoeui", 12)
+        label = "Abrir PDF" if exists else "PDF indisponível"
+        s = fn.render(label, True, fc)
+        surface.blit(s, (btn.x + (btn.w - s.get_width())//2,
+                          btn.y + (btn.h - s.get_height())//2))
 
     def _draw_scrollbar(self, surface):
         sb = self._sb_rect()

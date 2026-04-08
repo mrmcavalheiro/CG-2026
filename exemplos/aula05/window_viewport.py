@@ -22,11 +22,12 @@
 import pygame
 import math
 import config as cfg
-from exemplos.base import ExemploBase
-from interface.ui  import draw_label
-from interface.tabs   import TabBar, TAB_H
+from exemplos.base      import ExemploBase
+from exemplos.docs_teoria import DOCS_TEORIA
+from interface.ui       import draw_label
+from interface.tabs     import TabBar, TAB_H
 from interface.doc_view import DocView
-from interface.janela import WindowManager, draw_rows_in_win
+from interface.janela   import WindowManager, draw_rows_in_win
 
 
 # ── Objetos no espaco do mundo ───────────────────────────
@@ -63,7 +64,8 @@ class ExWindowViewport(ExemploBase):
         self.wn_h  =  120.0   # altura da janela
         self.flash = 0.0
         self._mgr  = None
-        self._teoria   = DocView(cfg.root_path("teoria", "Aula_05", "window_viewport.pdf"))
+        self._teoria   = DocView(fallback_blocks=DOCS_TEORIA["window_viewport"],
+                               download_pdf=cfg.root_path("teoria","Aula_05","window_viewport.pdf"))
         self._teoria.set_tab_offset(TAB_H)
         self._tabs = TabBar(["Demonstração", "Teoria"])
 
@@ -81,13 +83,17 @@ class ExWindowViewport(ExemploBase):
 
     def handle_mouse_down(self, pos):
         if self._tabs.handle_mouse_down(pos): return True
+        if self._tabs.active == 1:
+            return self._teoria.handle_mouse_down(pos)
         if self._tabs.active == 0 and self._mgr:
             return self._mgr.handle_mouse_down(pos)
         return False
 
     def handle_mouse_move(self, pos):
         self._tabs.handle_mouse_move(pos)
-        if self._tabs.active == 0 and self._mgr:
+        if self._tabs.active == 1:
+            self._teoria.handle_mouse_move(pos)
+        elif self._mgr:
             self._mgr.handle_mouse_move(pos)
 
     def handle_mouse_up(self, pos):
@@ -161,6 +167,13 @@ class ExWindowViewport(ExemploBase):
         return xv, yv
 
     def draw(self, surface, fonts):
+        if self._mgr is None:
+            self._init_windows()
+        self._tabs.draw(surface, fonts)
+        if self._tabs.active == 1:
+            self._teoria.render(surface)
+            return
+
         cr  = cfg.canvas_rect()
         cax, cay, caw, cah = cr
 
@@ -329,11 +342,6 @@ class ExWindowViewport(ExemploBase):
         # ════════════════════════════════════════
         info_x = vp_x + vp_w + 15
         info_w = cax + caw - info_x - 8
-
-        if self._mgr is None:
-            self._init_windows()
-
-        self._tabs.draw(surface, fonts)
 
         vc = cfg.YELLOW if self.flash > 0 else cfg.WHITE
         rows_info = [

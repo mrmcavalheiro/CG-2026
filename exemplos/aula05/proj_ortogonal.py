@@ -21,11 +21,12 @@
 import pygame
 import math
 import config as cfg
-from exemplos.base import ExemploBase
-from interface.ui  import draw_label, draw_circle_alpha
-from interface.tabs   import TabBar, TAB_H
+from exemplos.base      import ExemploBase
+from exemplos.docs_teoria import DOCS_TEORIA
+from interface.ui       import draw_label, draw_circle_alpha
+from interface.tabs     import TabBar, TAB_H
 from interface.doc_view import DocView
-from interface.janela import WindowManager, draw_rows_in_win
+from interface.janela   import WindowManager, draw_rows_in_win
 
 
 # Vertices do cubo unitario centrado na origem
@@ -63,7 +64,8 @@ class ExProjOrtogonal(ExemploBase):
         self.angle_y   = 0.5
         self.auto_spin = False
         self._mgr      = None
-        self._teoria   = DocView(cfg.root_path("teoria", "Aula_05", "proj_ortogonal.pdf"))
+        self._teoria   = DocView(fallback_blocks=DOCS_TEORIA["proj_ortogonal"],
+                               download_pdf=cfg.root_path("teoria","Aula_05","proj_ortogonal.pdf"))
         self._teoria.set_tab_offset(TAB_H)
         self._tabs     = TabBar(["Demonstração", "Teoria"])
 
@@ -81,13 +83,17 @@ class ExProjOrtogonal(ExemploBase):
 
     def handle_mouse_down(self, pos):
         if self._tabs.handle_mouse_down(pos): return True
+        if self._tabs.active == 1:
+            return self._teoria.handle_mouse_down(pos)
         if self._tabs.active == 0 and self._mgr:
             return self._mgr.handle_mouse_down(pos)
         return False
 
     def handle_mouse_move(self, pos):
         self._tabs.handle_mouse_move(pos)
-        if self._tabs.active == 0 and self._mgr:
+        if self._tabs.active == 1:
+            self._teoria.handle_mouse_move(pos)
+        elif self._mgr:
             self._mgr.handle_mouse_move(pos)
 
     def handle_mouse_up(self, pos):
@@ -130,6 +136,13 @@ class ExProjOrtogonal(ExemploBase):
                 for v in verts]
 
     def draw(self, surface, fonts):
+        if self._mgr is None:
+            self._init_windows()
+        self._tabs.draw(surface, fonts)
+        if self._tabs.active == 1:
+            self._teoria.render(surface)
+            return
+
         cr  = cfg.canvas_rect()
         cax, cay, caw, cah = cr
 
@@ -228,11 +241,6 @@ class ExProjOrtogonal(ExemploBase):
                 alpha = int(180 + 75 * (verts[a][2] + verts[b][2]) / 2)
                 alpha = max(80, min(255, alpha))
                 pygame.draw.line(surface, cfg.YELLOW, pts3d[a], pts3d[b], 1)
-
-        if self._mgr is None:
-            self._init_windows()
-
-        self._tabs.draw(surface, fonts)
 
         rows_info = [
             ("Projecao Ortogonal",       cfg.BLUE),

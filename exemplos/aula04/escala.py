@@ -6,11 +6,12 @@
 import pygame
 import numpy as np
 import config as cfg
-from exemplos.base    import ExemploBase
-from interface.tabs   import TabBar, TAB_H
+from exemplos.base      import ExemploBase
+from exemplos.docs_teoria import DOCS_TEORIA
+from interface.tabs     import TabBar, TAB_H
 from interface.doc_view import DocView
-from interface.janela import WindowManager, draw_rows_in_win
-from interface.ui     import draw_grid, draw_axes, world_to_screen, draw_polygon
+from interface.janela   import WindowManager, draw_rows_in_win
+from interface.ui       import draw_grid, draw_axes, world_to_screen, draw_polygon
 
 
 
@@ -25,7 +26,8 @@ class ExEscala(ExemploBase):
         self.flash = 0.0
         self._mgr  = None
         self._tabs = TabBar(["Demonstração", "Teoria"])
-        self._teoria = DocView(cfg.root_path("teoria", "Aula_04", "escala.pdf"))
+        self._teoria = DocView(fallback_blocks=DOCS_TEORIA["escala"],
+                               download_pdf=cfg.root_path("teoria","Aula_04","escala.pdf"))
         self._teoria.set_tab_offset(TAB_H)
 
     def _init_windows(self):

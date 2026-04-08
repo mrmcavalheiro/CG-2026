@@ -25,11 +25,12 @@ import pygame
 import math
 import random
 import config as cfg
-from exemplos.base import ExemploBase
-from interface.ui  import draw_label, draw_line_alpha
-from interface.tabs   import TabBar, TAB_H
+from exemplos.base      import ExemploBase
+from exemplos.docs_teoria import DOCS_TEORIA
+from interface.ui       import draw_label, draw_line_alpha
+from interface.tabs     import TabBar, TAB_H
 from interface.doc_view import DocView
-from interface.janela import WindowManager, draw_rows_in_win
+from interface.janela   import WindowManager, draw_rows_in_win
 
 
 def cohen_code(x, y, xmin, xmax, ymin, ymax):
@@ -95,7 +96,8 @@ class ExClipping(ExemploBase):
         self.segs   = []
         self.flash  = 0.0
         self._mgr   = None
-        self._teoria   = DocView(cfg.root_path("teoria", "Aula_05", "clipping.pdf"))
+        self._teoria   = DocView(fallback_blocks=DOCS_TEORIA["clipping"],
+                               download_pdf=cfg.root_path("teoria","Aula_05","clipping.pdf"))
         self._teoria.set_tab_offset(TAB_H)
         self._tabs  = TabBar(["Demonstração", "Teoria"])
         self._gen_segments()
@@ -126,13 +128,18 @@ class ExClipping(ExemploBase):
 
     def handle_mouse_down(self, pos):
         if self._tabs.handle_mouse_down(pos): return True
+        if self._tabs.active == 1:
+            return self._teoria.handle_mouse_down(pos)
         if self._tabs.active == 0 and self._mgr:
             if self._mgr.handle_mouse_down(pos): return True
         return False
 
     def handle_mouse_move(self, pos):
         self._tabs.handle_mouse_move(pos)
-        if self._mgr: self._mgr.handle_mouse_move(pos)
+        if self._tabs.active == 1:
+            self._teoria.handle_mouse_move(pos)
+        elif self._mgr:
+            self._mgr.handle_mouse_move(pos)
 
     def handle_mouse_up(self, pos):
         self._tabs.handle_mouse_up()
@@ -188,6 +195,13 @@ class ExClipping(ExemploBase):
             self.flash = max(0.0, self.flash - dt)
 
     def draw(self, surface, fonts):
+        if self._mgr is None:
+            self._init_windows()
+        self._tabs.draw(surface, fonts)
+        if self._tabs.active == 1:
+            self._teoria.render(surface)
+            return
+
         cr  = cfg.canvas_rect()
         cax, cay, caw, cah = cr
 
@@ -339,11 +353,6 @@ class ExClipping(ExemploBase):
                              (off_x+A+30, off_y+10+li*18), 3)
             s = fn.render(lt, True, lc)
             surface.blit(s, (off_x+A+34, off_y+3+li*18))
-
-        if self._mgr is None:
-            self._init_windows()
-
-        self._tabs.draw(surface, fonts)
 
         rows_info = [
             ("Clipping",               cfg.RED),

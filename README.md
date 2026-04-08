@@ -10,12 +10,12 @@ Se preferir imagem estatica, use `assets/preview.png` e troque a extensao no lin
 
 ## Requisitos
 - Python 3.10+
-- Pygame
+- Pygame CE (`pygame-ce`)
 - NumPy
 
 Instalacao das dependencias:
 ```bash
-pip install pygame numpy
+pip install -r requirements.txt
 ```
 
 ## Como executar
@@ -23,6 +23,12 @@ Na raiz do projeto (`Exemplos`):
 
 ```bash
 python main.py
+```
+
+Ou no Windows:
+
+```bat
+requeimentos.bat
 ```
 
 ## Estrutura do projeto
@@ -46,4 +52,3 @@ git add .
 git commit -m "Atualiza projeto"
 git push
 ```
-

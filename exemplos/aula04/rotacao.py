@@ -8,10 +8,11 @@ import math
 import numpy as np
 import pygame
 import config as cfg
-from exemplos.base    import ExemploBase
-from interface.janela import WindowManager, draw_rows_in_win
-from interface.ui     import draw_grid, draw_axes, world_to_screen, draw_polygon
-from interface.tabs   import TabBar, TAB_H
+from exemplos.base      import ExemploBase
+from exemplos.docs_teoria import DOCS_TEORIA
+from interface.janela   import WindowManager, draw_rows_in_win
+from interface.ui       import draw_grid, draw_axes, world_to_screen, draw_polygon
+from interface.tabs     import TabBar, TAB_H
 from interface.doc_view import DocView
 
 CCW = +1
@@ -38,7 +39,8 @@ class ExRotacao(ExemploBase):
         self.flash     = 0.0
         self._mgr      = None
         self._tabs     = TabBar(["Demonstração", "Teoria"])
-        self._teoria   = DocView(cfg.root_path("teoria", "Aula_04", "rotacao.pdf"))
+        self._teoria   = DocView(fallback_blocks=DOCS_TEORIA["rotacao"],
+                               download_pdf=cfg.root_path("teoria","Aula_04","rotacao.pdf"))
         self._win_info = None
         self._win_code = None
         self._btn_ccw  = None   # Rect do botão CCW

@@ -8,6 +8,7 @@ import math
 import pygame
 import config as cfg
 from exemplos.base    import ExemploBase
+from exemplos.docs_teoria import DOCS_TEORIA
 from interface.janela import WindowManager, draw_rows_in_win
 from interface.tabs   import TabBar, TAB_H
 from interface.doc_view import DocView
@@ -29,7 +30,8 @@ class ExSenoCosseno(ExemploBase):
         self.MAX_HIST  = 360
         self._mgr      = None
         self._tabs     = TabBar(["Demonstração", "Teoria"])
-        self._teoria   = DocView(cfg.root_path("teoria", "Fundamentos", "seno_cosseno.pdf"))
+        self._teoria   = DocView(fallback_blocks=DOCS_TEORIA["seno_cosseno"],
+                               download_pdf=cfg.root_path("teoria","Fundamentos","seno_cosseno.pdf"))
         self._teoria.set_tab_offset(TAB_H)
         self._win_info   = None
         self._win_teoria = None
