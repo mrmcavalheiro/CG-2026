@@ -32,3 +32,10 @@ htmlcov/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Claude Code
+.claude/
+
+# Temporarios
+*_novo.pdf
+objetos.mtl
